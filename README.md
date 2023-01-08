@@ -24,7 +24,7 @@ and running the following command if you're using ```pip```:
 
 The app can then be started using
 
-```fastapi run```
+```python3 -m uvicorn app.main.app:app --reload```
 
 
 ## Calling the API
