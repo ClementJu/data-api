@@ -1,3 +1,4 @@
+import os
 from typing import List, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, validator
@@ -17,7 +18,7 @@ class Settings(BaseSettings):
 
     class Config:
         case_sensitive = True
-        env_file = ".env"
+        env_file = '.env.docker' if 'ENVIRONMENT' in os.environ and os.environ['ENVIRONMENT'] == 'DOCKER' else '.env'
 
 
 settings = Settings()
