@@ -32,3 +32,14 @@ The app can then be started using
 The above-mentioned instructions with run the app on the port 8000 of the locale machine.
 
 You can reach the Swagger documentation by accessing ```http://localhost:8000/docs```.
+
+
+## Running tests
+
+Tests are automatically run pre-commit. If you want to run them manually, go into the API directory using
+
+```cd API```
+
+and run
+
+```python3 -m pytest```

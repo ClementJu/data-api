@@ -2,12 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import app.helpers.logging_helper as logging_helper
+from app.config.config import settings
+from app.controllers.data_controller import data_router
 from app.controllers.health_controller import health_router
-from app.core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
 app.include_router(health_router)
+app.include_router(data_router)
 
 app.add_middleware(
     CORSMiddleware,
