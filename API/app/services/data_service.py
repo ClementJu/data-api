@@ -6,8 +6,8 @@ from app.data.entities import TemporaryDialogDataEntity
 from app.data.models import DialogDataCreateModel, DialogDataModel
 
 
-async def save_dialog_data(dialog_data: DialogDataCreateModel, customer_id: str,
-                           dialog_id: str, db: Session) -> DialogDataModel:
+def save_dialog_data(dialog_data: DialogDataCreateModel, customer_id: str,
+                     dialog_id: str, db: Session) -> DialogDataModel:
     dialog_data_to_insert = TemporaryDialogDataEntity(
         customer_id=customer_id,
         dialog_id=dialog_id,
