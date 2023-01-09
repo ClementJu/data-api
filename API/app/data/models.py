@@ -25,6 +25,7 @@ class ConsentCreateModel(BaseModel):
 class ConsentModel(ConsentCreateModel):
     id: int
     dialog_id: str
+    received_at_timestamp_utc: datetime
 
     class Config:
         orm_mode = True

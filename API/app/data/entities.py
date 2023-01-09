@@ -27,3 +27,4 @@ class ConsentEntity(Base):
     id = Column(Integer, primary_key=True)
     dialog_id = Column(String)
     has_given_consent = Column(Boolean)
+    received_at_timestamp_utc = Column(DateTime, index=True, default=datetime.utcnow())
