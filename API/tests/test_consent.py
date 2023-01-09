@@ -1,3 +1,6 @@
+from typing import Dict
+
+from starlette.responses import Response
 from tests.helpers import test_base, test_client
 
 from app.data.entities import ConsentEntity, DialogDataEntity, TemporaryDialogDataEntity
@@ -5,13 +8,9 @@ from app.data.entities import ConsentEntity, DialogDataEntity, TemporaryDialogDa
 
 def test_save_consent_should_work() -> None:
     test_base.empty_database()
-    dialog_data_payloads = test_base.get_test_payloads_save_dialog_data()
 
     # Case True
-    test_client.post(
-        '/data/id12/did34',
-        json=dialog_data_payloads[0]
-    )
+    _insert_dialog_data(dialog_id='did34')
 
     test_client.post(
         '/consents/did34',
@@ -25,15 +24,13 @@ def test_save_consent_should_work() -> None:
     assert consents[0].has_given_consent
     assert consents[0].dialog_id == 'did34'
 
-    consents_dialog_id = db.query(ConsentEntity).filter(ConsentEntity.dialog_id == 'did34').all()
-    assert len(consents_dialog_id) == 1
-    assert consents_dialog_id[0].has_given_consent
-    assert consents_dialog_id[0].dialog_id == 'did34'
+    consents_for_given_dialog_id = db.query(ConsentEntity).filter(ConsentEntity.dialog_id == 'did34').all()
+    assert len(consents_for_given_dialog_id) == 1
+    assert consents_for_given_dialog_id[0].has_given_consent
+    assert consents_for_given_dialog_id[0].dialog_id == 'did34'
 
-    test_client.post(
-        '/data/id12/did55',
-        json=dialog_data_payloads[0]
-    )
+    # Case False
+    _insert_dialog_data(dialog_id='did55')
 
     test_client.post(
         '/consents/did55',
@@ -42,14 +39,13 @@ def test_save_consent_should_work() -> None:
         }
     )
 
-    # Case False
-    consents2 = db.query(ConsentEntity).all()
-    assert len(consents2) == 2
+    consents_after_two_insertions = db.query(ConsentEntity).all()
+    assert len(consents_after_two_insertions) == 2
 
-    consents_dialog_id = db.query(ConsentEntity).filter(ConsentEntity.dialog_id == 'did55').all()
-    assert len(consents_dialog_id) == 1
-    assert not consents_dialog_id[0].has_given_consent
-    assert consents_dialog_id[0].dialog_id == 'did55'
+    consents_for_given_dialog_id = db.query(ConsentEntity).filter(ConsentEntity.dialog_id == 'did55').all()
+    assert len(consents_for_given_dialog_id) == 1
+    assert not consents_for_given_dialog_id[0].has_given_consent
+    assert consents_for_given_dialog_id[0].dialog_id == 'did55'
 
 
 def test_save_consent_should_throw_if_no_temporary_data_for_dialog_id() -> None:
@@ -65,12 +61,8 @@ def test_save_consent_should_throw_if_no_temporary_data_for_dialog_id() -> None:
 
 def test_save_consent_should_throw_if_consent_was_already_given() -> None:
     test_base.empty_database()
-    dialog_data_payloads = test_base.get_test_payloads_save_dialog_data()
 
-    test_client.post(
-        '/data/id12/did55',
-        json=dialog_data_payloads[0]
-    )
+    _insert_dialog_data(dialog_id='did55')
 
     response = test_client.post(
         '/consents/did55',
@@ -100,12 +92,8 @@ def test_save_consent_should_throw_if_consent_was_already_given() -> None:
 def test_save_consent_should_move_data_if_consent_is_given() -> None:
     test_base.empty_database()
     db = test_base.get_database()
-    dialog_data_payloads = test_base.get_test_payloads_save_dialog_data()
 
-    test_client.post(
-        '/data/id12/did55',
-        json=dialog_data_payloads[0]
-    )
+    _insert_dialog_data(dialog_id='did55')
 
     assert len(db.query(ConsentEntity).all()) == 0
     assert len(db.query(TemporaryDialogDataEntity).all()) == 1
@@ -126,13 +114,10 @@ def test_save_consent_should_move_data_if_consent_is_given() -> None:
 
 def test_save_consent_should_erase_data_if_consent_is_not_given() -> None:
     test_base.empty_database()
-    db = test_base.get_database()
-    dialog_data_payloads = test_base.get_test_payloads_save_dialog_data()
 
-    test_client.post(
-        '/data/id12/did55',
-        json=dialog_data_payloads[0]
-    )
+    _insert_dialog_data(dialog_id='did55')
+
+    db = test_base.get_database()
 
     assert len(db.query(ConsentEntity).all()) == 0
     assert len(db.query(TemporaryDialogDataEntity).all()) == 1
@@ -149,3 +134,16 @@ def test_save_consent_should_erase_data_if_consent_is_not_given() -> None:
     assert len(db.query(ConsentEntity).all()) == 1
     assert len(db.query(TemporaryDialogDataEntity).all()) == 0
     assert len(db.query(DialogDataEntity).all()) == 0
+
+
+def _get_first_dialog_data_payload() -> Dict[str, str]:
+    dialog_data_payloads = test_base.get_test_payloads_save_dialog_data()
+    return dialog_data_payloads[0]
+
+
+def _insert_dialog_data(payload: Dict[str, str] = None, customer_id: str = 'id12',
+                        dialog_id: str = 'did55') -> Response:
+    return test_client.post(
+        f'/data/{customer_id}/{dialog_id}',
+        json=_get_first_dialog_data_payload() if payload is None else payload
+    )
