@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 
 from app.data.database import Base
 
@@ -20,3 +20,11 @@ class DialogDataEntity(Base, DialogDataEntityBase):
 
 class TemporaryDialogDataEntity(Base, DialogDataEntityBase):
     __tablename__ = 'temporary_dialog_data'
+
+
+class ConsentEntity(Base):
+    __tablename__ = 'consents'
+    id = Column(Integer, primary_key=True)
+    dialog_id = Column(String)
+    has_given_consent = Column(Boolean)
+    received_at_timestamp_utc = Column(DateTime, index=True, default=datetime.utcnow())
