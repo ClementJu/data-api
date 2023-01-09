@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
 
 import app.services.data_service as service
@@ -16,13 +16,14 @@ data_router = APIRouter(
 )
 
 
-@data_router.post("/{customer_id}/{dialog_id}", response_model=DialogDataModel)
-def save_dialog_data(dialog_data: DialogDataCreateModel, customer_id: str,
-                     dialog_id: str, db: Session = Depends(get_db)) -> DialogDataModel:
+@data_router.post("/{customerId}/{dialogId}", response_model=DialogDataModel)
+def save_dialog_data(dialog_data: DialogDataCreateModel, customer_id: str = Path(None, alias="customerId"),
+                     dialog_id: str = Path(None, alias="dialogId"), db: Session = Depends(get_db)) -> DialogDataModel:
     return service.save_dialog_data(dialog_data=dialog_data, customer_id=customer_id, dialog_id=dialog_id, db=db)
 
 
 @data_router.get("", response_model=List[DialogDataModel])
-def get_dialog_data(language: Optional[str] = None, customer_id: Optional[str] = None,
+def get_dialog_data(language: Optional[str] = Query(None, alias='language'),
+                    customer_id: Optional[str] = Query(None, alias='customerId'),
                     db: Session = Depends(get_db)) -> List[DialogDataModel]:
     return service.get_dialog_data(language=language, customer_id=customer_id, db=db)

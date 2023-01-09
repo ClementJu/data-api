@@ -78,7 +78,7 @@ class HelperTestBase:
     def give_consent(self, has_given_consent: bool = True, dialog_id: str = 'did55') -> Response:
         return self.test_client.post(
             f'/consents/{dialog_id}',
-            json={'has_given_consent': ('true' if has_given_consent else 'false')}
+            json='true' if has_given_consent else 'false'
         )
 
     def get_dialog_data(self, query_string: str) -> Response:

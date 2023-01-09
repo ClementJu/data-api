@@ -10,7 +10,7 @@ health_router = APIRouter(
 )
 
 
-@health_router.get("/")
+@health_router.get("")
 async def get_health_status(response: Response) -> str:
     response.status_code = 200
     return 'Ok'
