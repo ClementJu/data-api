@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body, Depends
 from sqlalchemy.orm import Session
 
 import app.services.consent_service as service
 from app.data.database import get_db
-from app.data.models import ConsentCreateModel, ConsentModel
+from app.data.models import ConsentModel
 from app.helpers.logging_helper import LoggingRoute
 
 consent_router = APIRouter(
@@ -15,5 +15,6 @@ consent_router = APIRouter(
 
 
 @consent_router.post("/{dialog_id}", response_model=ConsentModel)
-def save_user_consent(consent: ConsentCreateModel, dialog_id: str, db: Session = Depends(get_db)) -> ConsentModel:
-    return service.save_user_consent(consent=consent, dialog_id=dialog_id, db=db)
+def save_user_consent(dialog_id: str, has_given_consent: bool = Body(default=None, embed=False),
+                      db: Session = Depends(get_db)) -> ConsentModel:
+    return service.save_user_consent(dialog_id=dialog_id, has_given_consent=has_given_consent, db=db)

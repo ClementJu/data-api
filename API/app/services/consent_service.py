@@ -2,10 +2,10 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.data.entities import ConsentEntity, DialogDataEntity, TemporaryDialogDataEntity
-from app.data.models import ConsentCreateModel, ConsentModel
+from app.data.models import ConsentModel
 
 
-def save_user_consent(consent: ConsentCreateModel, dialog_id: str, db: Session) -> ConsentModel:
+def save_user_consent(dialog_id: str, has_given_consent: bool, db: Session) -> ConsentModel:
     existing_consent = db.query(ConsentEntity).filter(ConsentEntity.dialog_id == dialog_id).first()
 
     if existing_consent is not None:
@@ -18,14 +18,14 @@ def save_user_consent(consent: ConsentCreateModel, dialog_id: str, db: Session) 
         raise HTTPException(status_code=404, detail=f'Cannot give consent: no temporary data for dialog_id {dialog_id}')
 
     consent_to_insert = ConsentEntity(
-        has_given_consent=consent.has_given_consent,
+        has_given_consent=has_given_consent,
         dialog_id=dialog_id
     )
 
     db.add(consent_to_insert)
 
     for temporary_entry in existing_temporary_data:
-        if consent.has_given_consent:
+        if has_given_consent:
             db.add(DialogDataEntity(
                 customer_id=temporary_entry.customer_id,
                 text=temporary_entry.text,

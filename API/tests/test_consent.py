@@ -55,6 +55,28 @@ def test_save_consent_should_throw_if_consent_was_already_given() -> None:
     assert response.status_code == 409
 
 
+def test_save_consent_should_throw_if_invalid_payload() -> None:
+    test_base.empty_database()
+    test_base.insert_dialog_data(dialog_id='did55')
+    response = test_base.get_test_client().post(
+        '/consents/did55',
+        json=''
+    )
+    assert response.status_code == 422
+
+    response = test_base.get_test_client().post(
+        '/consents/did55',
+        json='fals'
+    )
+    assert response.status_code == 422
+
+    response = test_base.get_test_client().post(
+        '/consents/did55',
+        json='a3sfda'
+    )
+    assert response.status_code == 422
+
+
 def test_save_consent_should_move_data_if_consent_is_given() -> None:
     test_base.empty_database()
     db = test_base.get_database()
