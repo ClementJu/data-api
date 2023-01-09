@@ -158,7 +158,7 @@ def test_get_data_should_work_with_customer_filter() -> None:
     test_base.insert_dialog_data(payload=dialog_data_payloads[2], customer_id='id89', dialog_id='did12')
 
     test_base.give_consent(has_given_consent=True, dialog_id='did12')
-    get_data = test_base.get_dialog_data(query_string='?customer_id=id89')
+    get_data = test_base.get_dialog_data(query_string='?customerId=id89')
     get_data_json = get_data.json()
     assert len(get_data_json) == 2
 
@@ -201,12 +201,12 @@ def test_get_data_should_work_with_multiple_filters() -> None:
 
     test_base.give_consent(has_given_consent=True, dialog_id='did12')
 
-    get_data_fr_id89 = test_base.get_dialog_data(query_string='?language=fr&customer_id=id89')
+    get_data_fr_id89 = test_base.get_dialog_data(query_string='?language=fr&customerId=id89')
 
     get_data_fr_id89_json = get_data_fr_id89.json()
     assert len(get_data_fr_id89_json) == 1
 
-    get_data_en_id89 = test_base.get_dialog_data(query_string='?language=en&customer_id=id89')
+    get_data_en_id89 = test_base.get_dialog_data(query_string='?language=en&customerId=id89')
 
     get_data_en_id89_json = get_data_en_id89.json()
     assert len(get_data_en_id89_json) == 1
@@ -226,18 +226,18 @@ def test_get_data_should_work_if_filter_does_not_match_data() -> None:
     get_data_unknown_language_json = get_data_unknown_language.json()
     assert len(get_data_unknown_language_json) == 0
 
-    get_data_unknown_customer_id = test_base.get_dialog_data(query_string='?customer_id=unknown')
+    get_data_unknown_customer_id = test_base.get_dialog_data(query_string='?customerId=unknown')
     get_data_unknown_customer_id_json = get_data_unknown_customer_id.json()
     assert len(get_data_unknown_customer_id_json) == 0
 
-    get_data_no_results = test_base.get_dialog_data(query_string='?language=unknown&customer_id=unknown')
+    get_data_no_results = test_base.get_dialog_data(query_string='?language=unknown&customerId=unknown')
     get_data_no_results_json = get_data_no_results.json()
     assert len(get_data_no_results_json) == 0
 
 
 def test_get_data_should_work_if_database_is_empty() -> None:
     test_base.empty_database()
-    get_data_no_results = test_base.get_dialog_data(query_string='?language=unknown&customer_id=unknown')
+    get_data_no_results = test_base.get_dialog_data(query_string='?language=unknown&customerId=unknown')
     get_data_no_results_json = get_data_no_results.json()
     assert get_data_no_results.status_code == 200
     assert len(get_data_no_results_json) == 0
