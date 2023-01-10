@@ -154,17 +154,20 @@ Checks whether the application is up and running.
 Returns a status code ```200``` and a body ```Ok``` if it is the case.
 
 
-###**Nice to have** - GET - /data/anomaly
+### **Nice to have** - ```GET - /data/anomaly```
 Retrieves information about anomalies, i.e., conversational data related to a given dialog ID that was temporarily stored and that has not received any consent decision recently. The period is configurable in the environment settings.
 The idea behind this endpoint is that conversational data could have been stored for a long time without receiving related consent information. No consent information does not mean that the user allows us to use his data, nor does it mean that he refuses consent. This endpoint could be used by any data administrator to be informed about the presence of old data. This person could then decide to permanently delete this data manually.
-Returns
+
+#### Returns
+```
 [
   {
-    "dialog_id": "string",
-    "customer_id": "string",
-    "received_at_timestamp_utc": "2023-01-09T23:57:25.703Z"
+    "dialog_id": string,
+    "customer_id": string,
+    "received_at_timestamp_utc": timestamp, e.g. "2023-01-09T23:57:25.703Z"
   }
 ]
+```
 
 
 
