@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
-from app.data.entities import DialogDataEntity, TemporaryDialogDataEntity
-from app.data.models import DialogDataCreateModel, DialogDataModel
+from app.config.config import settings
+from app.data.entities import ConsentEntity, DialogDataEntity, TemporaryDialogDataEntity
+from app.data.models import AnomalyDataModel, DialogDataCreateModel, DialogDataModel
 
 
 def save_dialog_data(dialog_data: DialogDataCreateModel, customer_id: str,
@@ -33,3 +34,22 @@ def get_dialog_data(language: Optional[str], customer_id: Optional[str], db: Ses
 
     matching_data = query_builder.order_by(DialogDataEntity.received_at_timestamp_utc.desc()).all()
     return matching_data
+
+
+def get_anomalies(db: Session) -> List[AnomalyDataModel]:
+    limit_date_anomaly = datetime.utcnow() - timedelta(milliseconds=settings.ANOMALY_PERIOD_MS)
+    consents_given = db.query(ConsentEntity.dialog_id)
+
+    """
+    An anomaly is defined as an entry in the Temporary Data Table if no consent was given for the related dialog ID
+    and if it was received before a specific limit date, computed as follows: "NOW - ANOMALY_PERIOD"
+    """
+    anomalies = (db.query(TemporaryDialogDataEntity)
+                 .filter(TemporaryDialogDataEntity.received_at_timestamp_utc < limit_date_anomaly)
+                 .filter(~TemporaryDialogDataEntity.dialog_id.in_(consents_given)))
+
+    return list(map(lambda temporary_data_row: AnomalyDataModel(
+        dialog_id=temporary_data_row.dialog_id,
+        customer_id=temporary_data_row.customer_id,
+        received_at_timestamp_utc=temporary_data_row.received_at_timestamp_utc
+    ), anomalies))
