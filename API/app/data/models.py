@@ -29,3 +29,9 @@ class ConsentModel(ConsentCreateModel):
 
     class Config:
         orm_mode = True
+
+
+class AnomalyDataModel(BaseModel):
+    dialog_id: str
+    customer_id: str
+    received_at_timestamp_utc: datetime
