@@ -29,7 +29,7 @@ and running the following command if you're using ```pip```:
 
 The app can then be started using
 
-```python3 -m uvicorn app.main.app:app --reload```
+```python3 -m uvicorn app.main:app --reload```
 
 
 ## Calling the API
