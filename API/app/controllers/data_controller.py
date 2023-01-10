@@ -22,7 +22,7 @@ def save_dialog_data(dialog_data: DialogDataCreateModel, customer_id: str = Path
     return service.save_dialog_data(dialog_data=dialog_data, customer_id=customer_id, dialog_id=dialog_id, db=db)
 
 
-@data_router.get("", response_model=List[DialogDataModel])
+@data_router.get("/", response_model=List[DialogDataModel])
 def get_dialog_data(language: Optional[str] = Query(None, alias='language'),
                     customer_id: Optional[str] = Query(None, alias='customerId'),
                     db: Session = Depends(get_db)) -> List[DialogDataModel]:

@@ -83,7 +83,7 @@ class HelperTestBase:
 
     def get_dialog_data(self, query_string: str) -> Response:
         return self.test_client.get(
-            f'/data{query_string}'
+            f'/data/{query_string}'
         )
 
 
