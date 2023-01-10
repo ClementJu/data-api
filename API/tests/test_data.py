@@ -1,7 +1,10 @@
+import time
 from typing import List
 
 import pytest
 from tests.helpers import test_base
+
+from app.config.config import settings
 
 
 def test_save_data_should_work() -> None:
@@ -275,6 +278,49 @@ def test_get_data_should_not_be_case_sensitive() -> None:
     get_data4 = test_base.get_dialog_data(query_string='?language=FR')
     get_data4_json = get_data4.json()
     assert len(get_data4_json) == 1
+
+
+def test_get_anomalies_should_work() -> None:
+    settings.ANOMALY_PERIOD_MS = 500
+    test_base.empty_database()
+    dialog_data_payloads = test_base.get_test_payloads_save_dialog_data()
+
+    test_base.insert_dialog_data(payload=dialog_data_payloads[0], customer_id='id11', dialog_id='did3')
+
+    get_data_no_anomaly = test_base.get_test_client().get('/data/anomaly')
+    get_data_no_anomaly_json = get_data_no_anomaly.json()
+    assert len(get_data_no_anomaly_json) == 0
+
+    time.sleep(0.8)
+
+    get_data_anomaly = test_base.get_test_client().get('/data/anomaly')
+    get_data_anomaly_json = get_data_anomaly.json()
+    assert len(get_data_anomaly_json) == 1
+    assert get_data_anomaly_json[0]['customer_id'] == 'id11'
+    assert get_data_anomaly_json[0]['dialog_id'] == 'did3'
+
+
+def test_get_anomalies_should_not_throw_with_empty_database() -> None:
+    settings.ANOMALY_PERIOD_MS = 800
+    test_base.empty_database()
+
+    get_data_no_anomaly = test_base.get_test_client().get('/data/anomaly')
+    get_data_no_anomaly_json = get_data_no_anomaly.json()
+    assert len(get_data_no_anomaly_json) == 0
+    assert get_data_no_anomaly.status_code == 200
+
+
+def test_get_anomalies_work_if_there_are_no_anomalies() -> None:
+    settings.ANOMALY_PERIOD_MS = 36000000
+    test_base.empty_database()
+    dialog_data_payloads = test_base.get_test_payloads_save_dialog_data()
+
+    test_base.insert_dialog_data(payload=dialog_data_payloads[0], customer_id='id11', dialog_id='did3')
+
+    get_data_no_anomaly = test_base.get_test_client().get('/data/anomaly')
+    get_data_no_anomaly_json = get_data_no_anomaly.json()
+    assert len(get_data_no_anomaly_json) == 0
+    assert get_data_no_anomaly.status_code == 200
 
 
 @pytest.fixture(scope='session', autouse=True)
