@@ -23,7 +23,8 @@ def save_dialog_data(dialog_data: DialogDataCreateModel, customer_id: str,
     return dialog_data_to_insert
 
 
-def get_dialog_data(language: Optional[str], customer_id: Optional[str], db: Session) -> List[DialogDataModel]:
+def get_dialog_data(language: Optional[str], customer_id: Optional[str], db: Session,
+                    skip: Optional[int] = None, limit: Optional[int] = None) -> List[DialogDataModel]:
     query_builder = db.query(DialogDataEntity)
 
     if language is not None and language != '':
@@ -32,7 +33,16 @@ def get_dialog_data(language: Optional[str], customer_id: Optional[str], db: Ses
     if customer_id is not None and customer_id != '':
         query_builder = query_builder.filter(DialogDataEntity.customer_id == customer_id)
 
-    matching_data = query_builder.order_by(DialogDataEntity.received_at_timestamp_utc.desc()).all()
+    # Order by has to be applied before skip and limit
+    query_builder = query_builder.order_by(DialogDataEntity.received_at_timestamp_utc.desc())
+
+    if skip is not None and skip > 0:
+        query_builder = query_builder.offset(skip)
+
+    if limit is not None and limit > 0:
+        query_builder = query_builder.limit(limit)
+
+    matching_data = query_builder.all()
     return matching_data
 
 

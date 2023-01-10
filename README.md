@@ -29,7 +29,7 @@ and running the following command if you're using ```pip```:
 
 The app can then be started using
 
-```python3 -m uvicorn app.main.app:app --reload```
+```python3 -m uvicorn app.main:app --reload```
 
 
 ## Calling the API
@@ -124,8 +124,10 @@ Retrieves conversational data, for which consent was given by the customer. The 
 
 #### Query parameters
 
-- ```language```: string (case-insensitive)
-- ```customerId```: string
+- ```language```: string (case-insensitive, optional)
+- ```customerId```: string (optional)
+- **Nice to have** - ```skip```: int (optional, greater or equal to 0) - Skips ```skip``` results
+- **Nice to have** - ```limit```: int (optional, greater or equal to 1) - Returns at most ```limit``` results
 
 #### Returns
 
@@ -150,6 +152,21 @@ Checks whether the application is up and running.
 #### Returns
 
 Returns a status code ```200``` and a body ```Ok``` if it is the case.
+
+
+###**Nice to have** - GET - /data/anomaly
+Retrieves information about anomalies, i.e., conversational data related to a given dialog ID that was temporarily stored and that has not received any consent decision recently. The period is configurable in the environment settings.
+The idea behind this endpoint is that conversational data could have been stored for a long time without receiving related consent information. No consent information does not mean that the user allows us to use his data, nor does it mean that he refuses consent. This endpoint could be used by any data administrator to be informed about the presence of old data. This person could then decide to permanently delete this data manually.
+Returns
+[
+  {
+    "dialog_id": "string",
+    "customer_id": "string",
+    "received_at_timestamp_utc": "2023-01-09T23:57:25.703Z"
+  }
+]
+
+
 
 ## Additional features
 

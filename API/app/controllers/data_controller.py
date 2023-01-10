@@ -22,11 +22,13 @@ def save_dialog_data(dialog_data: DialogDataCreateModel, customer_id: str = Path
     return service.save_dialog_data(dialog_data=dialog_data, customer_id=customer_id, dialog_id=dialog_id, db=db)
 
 
-@data_router.get("", response_model=List[DialogDataModel])
+@data_router.get("/", response_model=List[DialogDataModel])
 def get_dialog_data(language: Optional[str] = Query(None, alias='language'),
                     customer_id: Optional[str] = Query(None, alias='customerId'),
+                    skip: Optional[int] = Query(None, alias='skip', ge=0),
+                    limit: Optional[int] = Query(None, alias='limit', ge=1),
                     db: Session = Depends(get_db)) -> List[DialogDataModel]:
-    return service.get_dialog_data(language=language, customer_id=customer_id, db=db)
+    return service.get_dialog_data(language=language, customer_id=customer_id, db=db, skip=skip, limit=limit)
 
 
 @data_router.get("/anomaly", response_model=List[AnomalyDataModel])
